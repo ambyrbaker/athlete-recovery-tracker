@@ -4,6 +4,7 @@ import {Activity, ArrowUpRight, CalendarDays, ChevronRight, ClipboardList, Dumbb
 import {dashboardMetrics, dateKey} from './metrics';
 import './style.css';
 import OpeningScreen from './OpeningScreen';
+import WhoopRecovery from './components/WhoopRecovery';
 const names={training:'Training',wellness:'Wellness',pt:'Physical therapy'};
 const icons={training:Dumbbell,wellness:Heart,pt:Activity};
 const defaults={training:{session_type:'Strength',duration_minutes:45,rpe:5,notes:''},wellness:{sleep_hours:8,sleep_quality:7,soreness:3,stress:3,pain:0,notes:''},pt:{exercise:'',sets:3,reps:10,duration_minutes:15,pain:0,notes:''}};
@@ -28,6 +29,7 @@ function App(){
  {error&&<div className="error" role="alert">{error}<button onClick={refresh}>Retry</button></div>}{notice&&<div className="toast" role="status"><Check size={16}/>{notice}</div>}
  {loading?<div className="loading" role="status"><RefreshCw className="spin"/> Loading…</div>:error?<div className="empty">Your data is unavailable. Check that the backend is running, then retry.</div>:view==='dashboard'?<>
  <section className="checkin"><div><h2>Today's wellness</h2><p>{current?`${current.sleep_hours} hours of sleep · Soreness ${current.soreness}/10 · Stress ${current.stress}/10 · Pain ${current.pain}/10`:'No entry today.'}</p></div><button className="button light" onClick={()=>open('wellness',current)}>{current?'Edit check-in':'Check in now'}<ArrowUpRight size={17}/></button></section>
+ <WhoopRecovery/>
  <div className="section-heading"><h2>This week</h2><span>Monday – today</span></div><section className="stats">{[[Dumbbell,'Training load',metrics.load.toLocaleString(),'AU','Duration × RPE'],[Timer,'Training duration',metrics.duration,'min',`${metrics.weekly.length} sessions logged`],[Activity,'Average soreness',metrics.soreness?.toFixed(1)??'—','/ 10','Weekly wellness average'],[Heart,'Average stress',metrics.stress?.toFixed(1)??'—','/ 10','Weekly wellness average']].map(([Icon,label,value,unit,caption])=><article className="card stat" key={label}><div className="stat-label">{label}</div><div className="stat-number">{value}<span>{unit}</span></div><small>{caption}</small></article>)}</section>
  <section className="trend-section"><div className="section-heading"><div className="trend-tabs" role="group" aria-label="Trend metric"><button aria-pressed={trend==='load'} onClick={()=>setTrend('load')}>Training load</button><button aria-pressed={trend==='sleep'} onClick={()=>setTrend('sleep')}>Sleep</button></div><span>Last 14 days</span></div><Chart title={trend==='load'?'Training load':'Sleep duration'} days={metrics.days} field={trend} unit={trend==='load'?'AU':'hours'}/></section>
  {latest&&<button className="latest-summary" onClick={()=>open('training',latest)}><span>Latest training</span><strong>{latest.session_type}</strong><span>{pretty(latest.date)} · {latest.duration_minutes} min · RPE {latest.rpe}</span><ChevronRight size={16}/></button>}

@@ -44,3 +44,22 @@ API tests run on a temporary SQLite database and cover all three CRUD flows, ID 
 ## Opening animation
 
 The black/navy/white introduction plays once per browser tab session (about 2.4 seconds). Skip intro or Escape dismisses it immediately. Reduced-motion preferences use a brief fade without line drawing or movement. Reloading the same tab skips the intro; open a fresh tab to view it again. Session storage is optional and no athlete data is stored there.
+
+## WHOOP dashboard integration
+
+The dashboard fetches `GET /api/whoop/recovery` independently of training, wellness, and PT data. It displays the latest record timestamp, recovery score, HRV (ms), resting heart rate (bpm), SpO₂ (%), and skin temperature (°C). Missing values are shown as —. WHOOP values do not overwrite wellness records or affect the existing dashboard calculations.
+
+Use the backend that already serves WHOOP (currently port 8000). Build with `npm run build --prefix frontend`, then open `http://127.0.0.1:8000/`. For development, run `npm run dev --prefix frontend`; its `/api` proxy preserves the prefix for all APIs. An older backend process must be restarted if it has not loaded the WHOOP router.
+
+Verification:
+
+```sh
+node --test frontend/src/services/whoop.test.js frontend/src/metrics.test.js
+npm run build --prefix frontend
+```
+
+On Overview, confirm all five readings and the timestamp match `/api/whoop/recovery` (values are rounded for display). Select Refresh to fetch again. Navigate to Training, Wellness, and Physical therapy to confirm existing logs still work. The panel shows loading, not-connected, expired-session, unavailable-data, and generic-error states. Service tests mock those responses without changing or deleting real tokens. Network failures and invalid JSON show a safe retry message; raw backend errors are not displayed.
+
+Connect/Reconnect opens the existing `/api/whoop/connect` route in a new tab. Complete the backend's existing OAuth flow, return to the dashboard, and select Refresh. The frontend never reads, stores, or sends WHOOP credentials. Automatic token refresh is intentionally not implemented; expired sessions require reconnecting. No new frontend dependencies are required.
+
+WHOOP backend setup requires `WHOOP_CLIENT_ID`, `WHOOP_CLIENT_SECRET`, and `WHOOP_REDIRECT_URI` in your local environment (or an ignored `.env` file loaded from the backend working directory). Register the matching `/api/whoop/callback` URL in your WHOOP app. Credentials and `.whoop_tokens.json` are intentionally excluded from Git; each local installation must connect its own account.

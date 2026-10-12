@@ -7,3 +7,4 @@ frontend/dist/
 *.db
 *.db-*
 .env
+.whoop_tokens.json
